@@ -1,13 +1,27 @@
 from typing import ClassVar
-from ..message import Message, MAX_AUTH_DATA, MAX_AUTH_DATA_PAGES, MAX_AUTH_PAGE_NON_ZERO_SIZE, MAX_AUTH_PAGE_ZERO_SIZE
+from ..message import (
+    Message,
+    MAX_AUTH_DATA,
+    MAX_AUTH_DATA_PAGES,
+    MAX_AUTH_PAGE_NON_ZERO_SIZE,
+    MAX_AUTH_PAGE_ZERO_SIZE,
+)
 import ubinascii
 import struct
 
-class Auth(Message):
 
+class Auth(Message):
     rid: ClassVar[int] = 0x2
 
-    def __init__(self, auth_type, auth_data_page, auth_last_page_index, auth_length, auth_timestamp, auth_data) -> None:
+    def __init__(
+        self,
+        auth_type,
+        auth_data_page,
+        auth_last_page_index,
+        auth_length,
+        auth_timestamp,
+        auth_data,
+    ) -> None:
         self.auth_type = auth_type
         self.auth_data_page = auth_data_page
         self.auth_last_page_index = auth_last_page_index
@@ -36,7 +50,10 @@ class Auth(Message):
             pack.auth_length = length
             pack.auth_timestamp = ts
 
-            x = pack.auth_last_page_index * MAX_AUTH_PAGE_NON_ZERO_SIZE + MAX_AUTH_PAGE_ZERO_SIZE
+            x = (
+                pack.auth_last_page_index * MAX_AUTH_PAGE_NON_ZERO_SIZE
+                + MAX_AUTH_PAGE_ZERO_SIZE
+            )
             if pack.auth_last_page_index >= MAX_AUTH_DATA_PAGES or pack.auth_length > x:
                 pack.auth_last_page_index = 0
                 pack.auth_length = 0
@@ -44,7 +61,10 @@ class Auth(Message):
             else:
                 pack.auth_length = len
         else:
-            offset = MAX_AUTH_PAGE_ZERO_SIZE + (pack.auth_data_page - 1) * MAX_AUTH_PAGE_NON_ZERO_SIZE
+            offset = (
+                MAX_AUTH_PAGE_ZERO_SIZE
+                + (pack.auth_data_page - 1) * MAX_AUTH_PAGE_NON_ZERO_SIZE
+            )
             amount = MAX_AUTH_PAGE_NON_ZERO_SIZE
 
         if pack.auth_data_page >= 0 and pack.auth_data_page < MAX_AUTH_DATA_PAGES:

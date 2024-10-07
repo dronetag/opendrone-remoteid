@@ -1,11 +1,10 @@
 from ..message import Message, MAX_ID_BYTE_SIZE
 from . import utils
-OperatorID_Type = {
-    "CAA": 0
-}
+
+OperatorID_Type = {"CAA": 0}
+
 
 class OperatorID(Message):
-
     rid: int = 0x5
 
     def __init__(self) -> None:
@@ -16,7 +15,7 @@ class OperatorID(Message):
     def parse(data) -> "OperatorID":
         pack = OperatorID()
         pack.operator_type = data[0]
-        pack.operator_id = str(data[1:], 'ascii')
+        pack.operator_id = str(data[1:], "ascii")
         return pack
 
     def pack(self):
@@ -28,4 +27,4 @@ class OperatorID(Message):
         return op_type + op_id + (b"\0" * 3)
 
     def __str__(self) -> str:
-        return f"RemoteID_OperatorID: operator_type={utils.get_key_by_value(OperatorID_Type, self.operator_type)} operator_id=\"{self.operator_id}\""
+        return f'RemoteID_OperatorID: operator_type={utils.get_key_by_value(OperatorID_Type, self.operator_type)} operator_id="{self.operator_id}"'

@@ -1,5 +1,6 @@
 from ..message import Message, RID_VERSION
 
+
 def pack(message: Message) -> bytes:
     type_nibble = (message.rid << 4) & 0xF0
     version_nibble = RID_VERSION & 0x0F

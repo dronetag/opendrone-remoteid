@@ -24,6 +24,7 @@ TYPES: dict[int, Type[Message]] = {
 
 logger = logging.getLogger("odid")
 
+
 def parse(data: bytes) -> Message:
     # sanity check that the message type (half)byte agrees with `self.rid`
     parsed_type = (data[0] & 0xF0) >> 4
@@ -32,7 +33,9 @@ def parse(data: bytes) -> Message:
 
     rid_version = data[0] & 0x0F  # RID version (does anyone use that?)
     if rid_version != RID_VERSION:
-        logger.warning(f"RID version {rid_version} arrived! We support only version {RID_VERSION}")
+        logger.warning(
+            f"RID version {rid_version} arrived! We support only version {RID_VERSION}"
+        )
 
     message = TYPES[parsed_type]()
     message.parse(data[1:])

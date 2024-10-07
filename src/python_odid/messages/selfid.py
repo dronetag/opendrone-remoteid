@@ -1,14 +1,10 @@
 from ..message import Message, MAX_STRING_BYTE_SIZE
 from . import utils
 
-SelfID_Description_Type = {
-    "TEXT": 0,
-    "EMERGENCY": 1,
-    "EXTENDED_STATUS": 2
-}
+SelfID_Description_Type = {"TEXT": 0, "EMERGENCY": 1, "EXTENDED_STATUS": 2}
+
 
 class SelfID(Message):
-
     rid: int = 0x3
 
     description_type: int
@@ -21,7 +17,7 @@ class SelfID(Message):
     def parse(self, data: bytes) -> bytes:
         data = super().parse(data)
         self.description_type = data[0]
-        self.operation_description = str(data[1:25], 'ascii')
+        self.operation_description = str(data[1:25], "ascii")
         return data[25:]
 
     def pack(self):
@@ -33,4 +29,4 @@ class SelfID(Message):
         return desc_type + desc
 
     def __str__(self) -> str:
-        return f"RemoteID_SelfID: description_type={utils.get_key_by_value(SelfID_Description_Type, self.description_type)} operation_description=\"{self.operation_description}\""
+        return f'RemoteID_SelfID: description_type={utils.get_key_by_value(SelfID_Description_Type, self.description_type)} operation_description="{self.operation_description}"'

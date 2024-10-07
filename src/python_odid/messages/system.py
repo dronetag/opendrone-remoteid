@@ -2,11 +2,7 @@ from ..message import Message, LAT_LONG_MULTIPLIER
 from . import utils
 import struct
 
-System_Operator_Location_Type = {
-    "TAKEOFF": 0,
-    "LIVE_GNSS": 1,
-    "FIXED": 2
-}
+System_Operator_Location_Type = {"TAKEOFF": 0, "LIVE_GNSS": 1, "FIXED": 2}
 
 System_Classification_Type = {
     "NONE": 0,
@@ -31,8 +27,8 @@ System_Class = {
     "CLASS_6": 7,
 }
 
-class System(Message):
 
+class System(Message):
     rid: int = 0x4
 
     def __init__(self) -> None:
@@ -55,7 +51,9 @@ class System(Message):
 
         next_format = "<BiiHBHHBHI"
         next_size = struct.calcsize(next_format)
-        types, lat, lng, a_count, a_radius, a_ceil, a_floor, cat, alt_geo, ts = struct.unpack(next_format, data[:next_size])
+        types, lat, lng, a_count, a_radius, a_ceil, a_floor, cat, alt_geo, ts = (
+            struct.unpack(next_format, data[:next_size])
+        )
         data = data[next_size:]
 
         pack.operator_location_type = types & 0x03
@@ -97,7 +95,19 @@ class System(Message):
         class_value = self.class_value & 0x0F
         cat = category | class_value
 
-        pack1 = struct.pack("<BiiHBHHBHI", types, raw_latitude, raw_longitude, self.area_count, raw_area_radius, raw_area_ceiling, raw_area_floor, cat, raw_altitude_geodetic, self.system_timestamp)
+        pack1 = struct.pack(
+            "<BiiHBHHBHI",
+            types,
+            raw_latitude,
+            raw_longitude,
+            self.area_count,
+            raw_area_radius,
+            raw_area_ceiling,
+            raw_area_floor,
+            cat,
+            raw_altitude_geodetic,
+            self.system_timestamp,
+        )
 
         return pack1 + (b"\0" * 1)
 

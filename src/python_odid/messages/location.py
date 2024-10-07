@@ -9,10 +9,7 @@ Location_Status = {
     "EMERGENCY": 3,
 }
 
-Location_Height_Type = {
-    "ABOVE_START": 0,
-    "AGL": 1
-}
+Location_Height_Type = {"ABOVE_START": 0, "AGL": 1}
 
 
 class Location(Message):
@@ -69,7 +66,9 @@ class Location(Message):
 
         next_format = "<BBHB"
         next_size = struct.calcsize(next_format)
-        hori_vert_acc, speed_baro_acc, ts, time_acc = struct.unpack(next_format, data[:next_size])
+        hori_vert_acc, speed_baro_acc, ts, time_acc = struct.unpack(
+            next_format, data[:next_size]
+        )
         data = data[next_size:]
 
         pack.accuracy_horizontal = hori_vert_acc & 0x0F
@@ -119,8 +118,20 @@ class Location(Message):
         d = self.speed_mult & 0x01
         first = ((a | b | c | d) & 0xFF).to_bytes(1, "little")
 
-        pack1 = first + (raw_direction & 0xFF).to_bytes(1, "little") + (raw_speed_hori & 0xFF).to_bytes(1, "little") + (raw_speed_vert & 0xFF).to_bytes(1, "little")
-        pack2 = struct.pack("<iihhh", raw_latitude, raw_longitude, raw_altitude_pressure, raw_altitude_geodetic, raw_height)
+        pack1 = (
+            first
+            + (raw_direction & 0xFF).to_bytes(1, "little")
+            + (raw_speed_hori & 0xFF).to_bytes(1, "little")
+            + (raw_speed_vert & 0xFF).to_bytes(1, "little")
+        )
+        pack2 = struct.pack(
+            "<iihhh",
+            raw_latitude,
+            raw_longitude,
+            raw_altitude_pressure,
+            raw_altitude_geodetic,
+            raw_height,
+        )
 
         accuracy_vertical = (self.accuracy_vertical << 4) & 0xF0
         accuracy_horizontal = self.accuracy_horizontal & 0x0F

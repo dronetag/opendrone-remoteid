@@ -6,7 +6,7 @@ BasicID_ID_Type = {
     "SERIAL_NUMBER": 1,
     "CAA_REGISTRATION_ID": 2,
     "UTM_ASSIGNED_UUID": 3,
-    "SPECIFIC_SESSION_ID": 4
+    "SPECIFIC_SESSION_ID": 4,
 }
 
 BasicID_UA_Type = {
@@ -25,12 +25,11 @@ BasicID_UA_Type = {
     "ROCKET": 12,
     "TETHERED_POWERED_AIRCRAFT": 13,
     "GROUND_OBSTACLE": 14,
-    "OTHER": 15
+    "OTHER": 15,
 }
 
 
 class BasicID(Message):
-
     rid: int = 0x0
 
     def __init__(self) -> None:
@@ -44,7 +43,7 @@ class BasicID(Message):
         basic_types = data[0]
         pack.id_type = (basic_types & 0xF0) >> 4
         pack.ua_type = basic_types & 0x0F
-        pack.uas_id = str(data[1:], 'ascii')
+        pack.uas_id = str(data[1:], "ascii")
         return pack
 
     def pack(self):
@@ -58,4 +57,4 @@ class BasicID(Message):
         return basic_types + uas_id + (b"\0" * 3)
 
     def __str__(self) -> str:
-        return f"RemoteID_BasicID: id_type={utils.get_key_by_value(BasicID_ID_Type, self.id_type)} ua_type={utils.get_key_by_value(BasicID_UA_Type, self.ua_type)} uas_id=\"{self.uas_id}\""
+        return f'RemoteID_BasicID: id_type={utils.get_key_by_value(BasicID_ID_Type, self.id_type)} ua_type={utils.get_key_by_value(BasicID_UA_Type, self.ua_type)} uas_id="{self.uas_id}"'
