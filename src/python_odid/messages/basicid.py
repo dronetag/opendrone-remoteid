@@ -1,4 +1,5 @@
-from .interface import RemoteID_Message, MAX_ID_BYTE_SIZE
+from ..message import Message, MAX_ID_BYTE_SIZE
+from . import utils
 
 BasicID_ID_Type = {
     "NONE": 0,
@@ -28,16 +29,18 @@ BasicID_UA_Type = {
 }
 
 
-class RemoteID_BasicID(RemoteID_Message):
+class BasicID(Message):
+
+    rid: int = 0x0
 
     def __init__(self) -> None:
         self.id_type = 0xF
         self.ua_type = 0xF
         self.uas_id = ""
 
-    @staticmethod
-    def parse(data) -> "RemoteID_BasicID":
-        pack = RemoteID_BasicID()
+    @classmethod
+    def parse(cls, data: bytes) -> "BasicID":
+        pack = cls()
         basic_types = data[0]
         pack.id_type = (basic_types & 0xF0) >> 4
         pack.ua_type = basic_types & 0x0F
@@ -55,4 +58,4 @@ class RemoteID_BasicID(RemoteID_Message):
         return basic_types + uas_id + (b"\0" * 3)
 
     def __str__(self) -> str:
-        return f"RemoteID_BasicID: id_type={self.get_key_from_value(BasicID_ID_Type, self.id_type)} ua_type={self.get_key_from_value(BasicID_UA_Type, self.ua_type)} uas_id=\"{self.uas_id}\""
+        return f"RemoteID_BasicID: id_type={utils.get_key_by_value(BasicID_ID_Type, self.id_type)} ua_type={utils.get_key_by_value(BasicID_UA_Type, self.ua_type)} uas_id=\"{self.uas_id}\""

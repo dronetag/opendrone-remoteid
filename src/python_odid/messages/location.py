@@ -1,4 +1,5 @@
-from .interface import RemoteID_Message, SPEED_VERTICAL_MULTIPLIER, LAT_LONG_MULTIPLIER
+from ..message import Message, SPEED_VERTICAL_MULTIPLIER, LAT_LONG_MULTIPLIER
+from . import utils
 import struct
 
 Location_Status = {
@@ -14,7 +15,8 @@ Location_Height_Type = {
 }
 
 
-class RemoteID_Location(RemoteID_Message):
+class Location(Message):
+    rid: int = 0x1
 
     def __init__(self) -> None:
         # See DIN EN 4709-002 for specific values i.e. for the accuracy
@@ -38,8 +40,8 @@ class RemoteID_Location(RemoteID_Message):
         self.accuracy_speed = 0
 
     @staticmethod
-    def parse(data) -> "RemoteID_Location":
-        pack = RemoteID_Location()
+    def parse(data) -> "Location":
+        pack = Location()
 
         b = data[0]
         pack.status = (b & 0xF0) >> 4
@@ -78,14 +80,14 @@ class RemoteID_Location(RemoteID_Message):
         pack.accuracy_time = time_acc
 
         # Do some calculation to convert raw values
-        pack.direction = RemoteID_Location.calc_direction(pack.direction, pack.ew_direction)
-        pack.speed_hori = RemoteID_Location.calc_speed(pack.speed_hori, pack.speed_mult)
+        pack.direction = Location.calc_direction(pack.direction, pack.ew_direction)
+        pack.speed_hori = Location.calc_speed(pack.speed_hori, pack.speed_mult)
         pack.speed_vert = SPEED_VERTICAL_MULTIPLIER * pack.speed_vert
         pack.latitude = LAT_LONG_MULTIPLIER * pack.latitude
         pack.longitude = LAT_LONG_MULTIPLIER * pack.longitude
-        pack.altitude_pressure = RemoteID_Location.calc_altitude(pack.altitude_pressure)
-        pack.altitude_geodetic = RemoteID_Location.calc_altitude(pack.altitude_geodetic)
-        pack.height = RemoteID_Location.calc_altitude(pack.height)
+        pack.altitude_pressure = Location.calc_altitude(pack.altitude_pressure)
+        pack.altitude_geodetic = Location.calc_altitude(pack.altitude_geodetic)
+        pack.height = Location.calc_altitude(pack.height)
         pack.accuracy_time = pack.accuracy_time * 0.1
 
         return pack
@@ -105,11 +107,11 @@ class RemoteID_Location(RemoteID_Message):
         raw_latitude = int(self.latitude / LAT_LONG_MULTIPLIER)
         raw_longitude = int(self.longitude / LAT_LONG_MULTIPLIER)
         raw_accuracy_time = int(self.accuracy_time / 0.1)
-        raw_direction = RemoteID_Location.calc_direction_raw(self.direction, self.ew_direction)
-        raw_speed_hori = RemoteID_Location.calc_speed_raw(self.speed_hori, self.speed_mult)
-        raw_altitude_pressure = RemoteID_Location.calc_altitude_raw(self.altitude_pressure)
-        raw_altitude_geodetic = RemoteID_Location.calc_altitude_raw(self.altitude_geodetic)
-        raw_height = RemoteID_Location.calc_altitude_raw(self.height)
+        raw_direction = Location.calc_direction_raw(self.direction, self.ew_direction)
+        raw_speed_hori = Location.calc_speed_raw(self.speed_hori, self.speed_mult)
+        raw_altitude_pressure = Location.calc_altitude_raw(self.altitude_pressure)
+        raw_altitude_geodetic = Location.calc_altitude_raw(self.altitude_geodetic)
+        raw_height = Location.calc_altitude_raw(self.height)
 
         a = (self.status << 4) & 0xF0
         b = (self.height_type << 2) & 0x04
@@ -164,4 +166,4 @@ class RemoteID_Location(RemoteID_Message):
         return int((value + 1000) * 2)
 
     def __str__(self) -> str:
-        return f"RemoteID_Location: latitude={self.latitude} longitude={self.longitude} status={self.get_key_from_value(Location_Status, self.status)} height={self.height} height_type={self.get_key_from_value(Location_Height_Type, self.height_type)} altitude_pressure={self.altitude_pressure} altitude_geodetic={self.altitude_geodetic} direction={self.direction} speed_hori={self.speed_hori} speed_vert={self.speed_vert} speed_mult={self.speed_mult} ew_direction={self.ew_direction} timestamp={self.timestamp} accuracy_time={self.accuracy_time} accuracy_horizontal={self.accuracy_horizontal} accuracy_vertical={self.accuracy_vertical} accuracy_baro={self.accuracy_baro} accuracy_speed={self.accuracy_speed}"
+        return f"RemoteID_Location: latitude={self.latitude} longitude={self.longitude} status={utils.get_key_by_value(Location_Status, self.status)} height={self.height} height_type={utils.get_key_by_value(Location_Height_Type, self.height_type)} altitude_pressure={self.altitude_pressure} altitude_geodetic={self.altitude_geodetic} direction={self.direction} speed_hori={self.speed_hori} speed_vert={self.speed_vert} speed_mult={self.speed_mult} ew_direction={self.ew_direction} timestamp={self.timestamp} accuracy_time={self.accuracy_time} accuracy_horizontal={self.accuracy_horizontal} accuracy_vertical={self.accuracy_vertical} accuracy_baro={self.accuracy_baro} accuracy_speed={self.accuracy_speed}"

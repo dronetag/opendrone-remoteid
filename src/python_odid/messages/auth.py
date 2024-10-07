@@ -1,8 +1,11 @@
-from .interface import RemoteID_Message, MAX_AUTH_DATA, MAX_AUTH_DATA_PAGES, MAX_AUTH_PAGE_NON_ZERO_SIZE, MAX_AUTH_PAGE_ZERO_SIZE
+from typing import ClassVar
+from ..message import Message, MAX_AUTH_DATA, MAX_AUTH_DATA_PAGES, MAX_AUTH_PAGE_NON_ZERO_SIZE, MAX_AUTH_PAGE_ZERO_SIZE
 import ubinascii
 import struct
 
-class RemoteID_Auth(RemoteID_Message):
+class Auth(Message):
+
+    rid: ClassVar[int] = 0x2
 
     def __init__(self, auth_type, auth_data_page, auth_last_page_index, auth_length, auth_timestamp, auth_data) -> None:
         self.auth_type = auth_type
@@ -11,10 +14,10 @@ class RemoteID_Auth(RemoteID_Message):
         self.auth_length = auth_length
         self.auth_timestamp = auth_timestamp
         self.auth_data = auth_data
-    
+
     @staticmethod
-    def parse(data) -> "RemoteID_Auth":
-        pack = RemoteID_Auth(None, None, None, None, None, None)
+    def parse(data) -> "Auth":
+        pack = Auth(None, None, None, None, None, None)
         types = data[0]
         pack.auth_type = (types & 0xF0) >> 4
         pack.auth_data_page = types & 0x0F
@@ -54,6 +57,6 @@ class RemoteID_Auth(RemoteID_Message):
 
     def pack(self):
         pass
-    
+
     def __str__(self) -> str:
         return f"RemoteID_Auth: auth_type={self.auth_type} auth_data_page={self.auth_data_page} auth_last_page_index={self.auth_last_page_index} auth_length={self.auth_length} auth_timestamp={self.auth_timestamp} auth_data={self.auth_data}"

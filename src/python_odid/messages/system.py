@@ -1,4 +1,5 @@
-from .interface import RemoteID_Message, LAT_LONG_MULTIPLIER
+from ..message import Message, LAT_LONG_MULTIPLIER
+from . import utils
 import struct
 
 System_Operator_Location_Type = {
@@ -30,7 +31,9 @@ System_Class = {
     "CLASS_6": 7,
 }
 
-class RemoteID_System(RemoteID_Message):
+class System(Message):
+
+    rid: int = 0x4
 
     def __init__(self) -> None:
         self.operator_location_type = System_Operator_Location_Type["TAKEOFF"]
@@ -47,9 +50,9 @@ class RemoteID_System(RemoteID_Message):
         self.system_timestamp = 0
 
     @staticmethod
-    def parse(data) -> "RemoteID_System":
-        pack = RemoteID_System()
-        
+    def parse(data) -> "System":
+        pack = System()
+
         next_format = "<BiiHBHHBHI"
         next_size = struct.calcsize(next_format)
         types, lat, lng, a_count, a_radius, a_ceil, a_floor, cat, alt_geo, ts = struct.unpack(next_format, data[:next_size])
@@ -72,9 +75,9 @@ class RemoteID_System(RemoteID_Message):
         pack.latitude = LAT_LONG_MULTIPLIER * pack.latitude
         pack.longitude = LAT_LONG_MULTIPLIER * pack.longitude
         pack.area_radius = pack.area_radius * 10
-        pack.area_ceiling = RemoteID_System.calc_altitude(pack.area_ceiling)
-        pack.area_floor = RemoteID_System.calc_altitude(pack.area_floor)
-        pack.altitude_geodetic = RemoteID_System.calc_altitude(pack.altitude_geodetic)
+        pack.area_ceiling = System.calc_altitude(pack.area_ceiling)
+        pack.area_floor = System.calc_altitude(pack.area_floor)
+        pack.altitude_geodetic = System.calc_altitude(pack.altitude_geodetic)
 
         return pack
 
@@ -82,9 +85,9 @@ class RemoteID_System(RemoteID_Message):
         raw_latitude = int(self.latitude / LAT_LONG_MULTIPLIER)
         raw_longitude = int(self.longitude / LAT_LONG_MULTIPLIER)
         raw_area_radius = int(self.area_radius / 10)
-        raw_area_ceiling = RemoteID_System.calc_altitude_raw(self.area_ceiling)
-        raw_area_floor = RemoteID_System.calc_altitude_raw(self.area_floor)
-        raw_altitude_geodetic = RemoteID_System.calc_altitude_raw(self.altitude_geodetic)
+        raw_area_ceiling = System.calc_altitude_raw(self.area_ceiling)
+        raw_area_floor = System.calc_altitude_raw(self.area_floor)
+        raw_altitude_geodetic = System.calc_altitude_raw(self.altitude_geodetic)
 
         classification_type = (self.classification_type << 2) & 0x1C
         operator_location_type = self.operator_location_type & 0x03
@@ -97,7 +100,7 @@ class RemoteID_System(RemoteID_Message):
         pack1 = struct.pack("<BiiHBHHBHI", types, raw_latitude, raw_longitude, self.area_count, raw_area_radius, raw_area_ceiling, raw_area_floor, cat, raw_altitude_geodetic, self.system_timestamp)
 
         return pack1 + (b"\0" * 1)
-    
+
     @staticmethod
     def calc_altitude(value) -> float:
         return value / 2 - 1000
@@ -107,4 +110,4 @@ class RemoteID_System(RemoteID_Message):
         return int((value + 1000) * 2)
 
     def __str__(self) -> str:
-        return f"RemoteID_System: latitude={self.latitude} longitude={self.longitude} operator_location_type={self.get_key_from_value(System_Operator_Location_Type, self.operator_location_type)} classification_type={self.get_key_from_value(System_Classification_Type, self.classification_type)} area_count={self.area_count} area_radius={self.area_radius} area_ceiling={self.area_ceiling} area_floor={self.area_floor} category={self.get_key_from_value(System_Category, self.category)} class_value={self.get_key_from_value(System_Class, self.class_value)} altitude_geodetic={self.altitude_geodetic} system_timestamp={self.system_timestamp}"
+        return f"RemoteID_System: latitude={self.latitude} longitude={self.longitude} operator_location_type={utils.get_key_by_value(System_Operator_Location_Type, self.operator_location_type)} classification_type={utils.get_key_by_value(System_Classification_Type, self.classification_type)} area_count={self.area_count} area_radius={self.area_radius} area_ceiling={self.area_ceiling} area_floor={self.area_floor} category={utils.get_key_by_value(System_Category, self.category)} class_value={utils.get_key_by_value(System_Class, self.class_value)} altitude_geodetic={self.altitude_geodetic} system_timestamp={self.system_timestamp}"
